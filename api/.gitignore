@@ -1,0 +1,9 @@
+node_modules/
+coverage/
+.env.local
+googleCloudCredentials.json
+*do_not_commit*
+*.csv
+*.log
+*.html
+tmp/

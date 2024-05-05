@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --darkest: #262725;
+  --dark: #484a47;
+  --muted: #5c6d70;
+  --mid: #a37774;
+  --light: #e88873;
+  --lightest: #e0ac9d;
+}
+
+/* @media (prefers-color-scheme: dark) {
+  :root {
+    --lightest: #484a47;
+    --dark: #e0ac9d;
+  }
+} */
+
+body {
+  color: var(--lightest);
+  background-color: var(--dark);
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+p {
+  margin: 5px;
+}
+
+input {
+  min-width: 300px;
+  display: block;
+  margin: 10px;
+  border-radius: 3px;
+  padding: 5px;
+  padding-left: 10px;
+  padding-right: 10px;
+  background-color: var(--light);
+  color: var(--dark);
+}
+input::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+
+.app-wrap {
+  max-width: 700px;
+  margin: auto;
+  padding: 5px;
+}
