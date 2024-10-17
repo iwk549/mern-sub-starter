@@ -1,0 +1,50 @@
+import {
+  RawContent,
+  RawInputContent,
+  RawSelectContent,
+  RawTab,
+} from "@/types/module.types";
+import * as yup from "yup";
+
+function createSchemaEntry(contentLine: RawContent) {
+  if (!contentLine.validation) return null;
+  let schema =
+    contentLine.type === "number"
+      ? yup
+          .number()
+          .transform((value) => (Number.isNaN(value) ? undefined : value))
+      : yup.string();
+  schema = schema.label(contentLine.validation.label || contentLine.label);
+  Object.keys(contentLine.validation).forEach((k) => {
+    if (k === "required" && contentLine.validation[k])
+      schema = schema.required();
+    else schema = schema.optional();
+    if (k === "min") schema = schema.min(contentLine.validation[k]);
+    if (k === "max") schema = schema.max(contentLine.validation[k]);
+  });
+
+  return schema;
+}
+
+export function createValidationObject(tabs: RawTab[]): {
+  schema: yup.ObjectSchema<{ [key: string]: string }>;
+  blankEntries: { [key: string]: string };
+} {
+  let fullSchema: { [key: string]: any } = {};
+  let blankEntries: { [key: string]: any } = {};
+  tabs.forEach((tab) => {
+    tab.content.forEach((contentLine) => {
+      if (Array.isArray(contentLine)) {
+        contentLine.forEach((line: RawContent) => {
+          fullSchema[line.id] = createSchemaEntry(line);
+          blankEntries[line.id] = "";
+        });
+      } else {
+        fullSchema[contentLine.id] = createSchemaEntry(contentLine);
+        blankEntries[contentLine.id] = "";
+      }
+    });
+  });
+
+  return { schema: yup.object(fullSchema), blankEntries };
+}

@@ -1,16 +1,25 @@
 const mongoose = require("mongoose");
 const redisClient = require("../startup/redisClient.startup");
 
-const { users } = require("./testData");
+const {
+  user: testUser,
+  account: testAccount,
+  authId,
+  accountId,
+} = require("./testData");
 
 const { Auth } = require("../models/auth.model");
 const { User } = require("../models/user.model");
 const { saltAndHashPassword } = require("../utils/encryption.util");
 const { createUserSession } = require("../utils/session.util");
+const { Account } = require("../models/account.model");
+const { Organization } = require("../models/organization.model");
 
 async function clearDb() {
-  await Auth.collection.deleteMany();
-  await User.collection.deleteMany();
+  await Auth.collection.deleteMany({});
+  await User.collection.deleteMany({});
+  await Account.collection.deleteMany({});
+  await Organization.collection.deleteMany({});
 }
 
 async function clearRedis() {
@@ -66,21 +75,34 @@ function testResponse(res, status, text) {
 
 async function insertUser(
   loggedIn = true,
+  userOverride = {},
   authOverride = {},
-  userOverride = {}
+  accountOverride = {},
+  existingAccount
 ) {
-  const plainTextPassword = authOverride.password || "Password1";
-  delete authOverride.password;
-  const password = await saltAndHashPassword(plainTextPassword);
-  const auth = new Auth({
-    password,
-    loginCode: null,
-    ...authOverride,
-  });
-  await auth.save();
+  let plainTextPassword, auth, account;
+  if (!existingAccount) {
+    plainTextPassword = authOverride.password || "Password1";
+    delete authOverride.password;
+    const password = await saltAndHashPassword(plainTextPassword);
+    auth = new Auth({
+      _id: authId,
+      password,
+      loginCode: null,
+      ...authOverride,
+    });
+    await auth.save();
+    account = new Account({
+      _id: accountId,
+      authId,
+      ...testAccount,
+      ...accountOverride,
+    });
+    await account.save();
+  }
   const user = new User({
-    authId: auth._id,
-    ...users[0],
+    accountId,
+    ...testUser,
     ...userOverride,
   });
   await user.save();
@@ -88,7 +110,7 @@ async function insertUser(
   let sessionId;
   if (loggedIn) sessionId = await createUserSession(user);
 
-  return { user, auth, plainTextPassword, sessionId };
+  return { user, auth, account, plainTextPassword, sessionId };
 }
 
 module.exports = {

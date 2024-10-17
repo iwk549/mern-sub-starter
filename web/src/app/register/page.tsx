@@ -3,7 +3,7 @@
 import { useContext } from "react";
 import * as yup from "yup";
 
-import Form from "@/components/form";
+import Form from "@/components/form/form";
 import toast from "../../utils/toast.util";
 import { registerUser } from "@/services/user.service";
 import { Registration } from "@/types/user.types";

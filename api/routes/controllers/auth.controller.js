@@ -1,3 +1,4 @@
+const { Account } = require("../../models/account.model");
 const { User } = require("../../models/user.model");
 const { comparePassword } = require("../../utils/encryption.util");
 const { createAndSendJwt } = require("../../utils/jwt.util");
@@ -5,14 +6,19 @@ const {
   getUserSession,
   deleteUserSession,
 } = require("../../utils/session.util");
-
-const genericLoginError = { status: 400, message: "Invalid login credentials" };
+const { genericLoginError } = require("../../utils/user.util");
 
 async function login(req, res, next) {
-  const user = await User.findOne({ email: req.body.email }).populate("authId");
-  const loginValid = await comparePassword(user, req.body.password);
+  const account = await Account.findOne({ email: req.body.email }).populate(
+    "authId"
+  );
+
+  const loginValid = await comparePassword(account, req.body.password);
   if (!loginValid) return next(genericLoginError);
 
+  const user = await User.findOne({ accountId: account._id }).populate(
+    "accountId"
+  );
   const existingSessionId = await getUserSession(user);
   if (existingSessionId && !req.body.overwriteSession)
     return next({

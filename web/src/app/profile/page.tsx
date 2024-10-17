@@ -4,7 +4,7 @@ import { useState, useContext, useEffect } from "react";
 import * as yup from "yup";
 
 import toast from "../../utils/toast.util";
-import Form from "@/components/form";
+import Form from "@/components/form/form";
 import Button from "@/components/common/button";
 import Confirm from "@/components/common/confirm";
 import {

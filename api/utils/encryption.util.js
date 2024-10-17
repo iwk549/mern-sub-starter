@@ -5,10 +5,10 @@ async function saltAndHashPassword(password) {
   return bcrypt.hash(password, salt);
 }
 
-async function comparePassword(user, password) {
+async function comparePassword(account, password) {
   let comp = false;
   try {
-    comp = await bcrypt.compare(password, user?.authId?.password);
+    comp = await bcrypt.compare(password, account?.authId?.password);
   } catch (error) {}
   return comp;
 }

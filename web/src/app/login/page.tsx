@@ -3,7 +3,7 @@
 import { useState, useContext } from "react";
 import * as yup from "yup";
 
-import Form from "@/components/form";
+import Form from "@/components/form/form";
 import toast from "../../utils/toast.util";
 import { Login } from "@/types/user.types";
 import { login } from "@/services/auth.service";

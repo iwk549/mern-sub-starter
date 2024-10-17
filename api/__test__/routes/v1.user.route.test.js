@@ -1,7 +1,7 @@
 const request = require("supertest");
 
 const { decodeJwt } = require("../../utils/jwt.util");
-const { users } = require("../testData");
+const { user: testUser, authId, accountId } = require("../testData");
 const {
   clearDb,
   testResponse,
@@ -11,6 +11,8 @@ const {
   insertUser,
 } = require("../testHelpers");
 const { User } = require("../../models/user.model");
+const { Auth } = require("../../models/auth.model");
+const { Account } = require("../../models/account.model");
 
 let server;
 const endpoint = "/api/v1/user";
@@ -29,55 +31,23 @@ describe("v1.auth.route", () => {
   });
 
   describe("User Route", () => {
-    describe("POST /", () => {
-      const exec = async (loginBody) =>
-        request(server).post(endpoint).send(loginBody);
-
-      it("should return 400 if email is not sent or empty", async () => {
-        const res = await exec();
-        expect(res.status).toBe(400);
-        testResponse(res, 400, "email is required");
-      });
-      it("should return 400 if user body is not valid", async () => {
-        const res = await exec({ email: "test1", invalidField: "xxx" });
-        testResponse(res, 400, "is required");
-      });
-      it("should return 400 if the email address already has an account", async () => {
-        const { user } = await insertUser();
-        const res = await exec({
-          ...users[0],
-          password: "Password1",
-          email: user.email,
-        });
-        testResponse(res, 400, "already registered");
-      });
-      it("should register the new user and provide a login token", async () => {
-        const res = await exec({ ...users[0], password: "Password1" });
-        testResponse(res, 200, "success");
-        const decoded = decodeJwt(res.header[authHeader]);
-        expect(decoded).toMatchObject(users[0]);
-        const savedUser = await User.findOne({ email: users[0].email });
-        expect(savedUser).toMatchObject(users[0]);
-      });
-    });
-
     describe("GET /", () => {
       const exec = async (token) =>
         request(server).get(endpoint).set(authHeader, token);
 
       testAuth(exec);
       it("should send back the updated user information", async () => {
-        const { user, sessionId } = await insertUser();
+        const { user, account, sessionId } = await insertUser();
         const token = user.generateAuthToken(sessionId);
-        user.name = "Update Name";
-        await user.save();
+        account.name = "Update Name";
+        await account.save();
         const res = await exec(token);
         testResponse(res, 200);
         const decoded = decodeJwt(res.header[authHeader]);
         expect(decoded).not.toMatchObject(user);
         expect(decoded).toMatchObject({
           name: "Update Name",
-          email: user.email,
+          email: account.email,
         });
       });
     });
@@ -87,14 +57,36 @@ describe("v1.auth.route", () => {
         request(server).delete(endpoint).set(authHeader, token);
 
       testAuth(exec);
-      it("should delete the user and auth", async () => {
+      it("should delete the user only if there are remaining accounts", async () => {
+        const { user, sessionId } = await insertUser();
+        await insertUser(false, {}, {}, {}, true);
+        const token = user.generateAuthToken(sessionId);
+
+        const res = await exec(token);
+
+        expect(res.body.user.deletedCount).toBe(1);
+        const deletedUser = await User.findById(user._id);
+        const auth = await Auth.findById(authId);
+        const account = await Account.findById(accountId);
+        expect(deletedUser).toBeNull();
+        expect(auth).not.toBeNull();
+        expect(account).not.toBeNull();
+      });
+      it("should delete the user, auth, and account if this is the last user", async () => {
         const { user, sessionId } = await insertUser();
         const token = user.generateAuthToken(sessionId);
+
         const res = await exec(token);
+
         expect(res.body.user.deletedCount).toBe(1);
         expect(res.body.auth.deletedCount).toBe(1);
-        const allUsers = await User.find();
-        expect(allUsers.length).toBe(0);
+        expect(res.body.account.deletedCount).toBe(1);
+        const deletedUser = await User.findById(user._id);
+        const deletedAuth = await Auth.findById(authId);
+        const deletedAccount = await Account.findById(accountId);
+        expect(deletedUser).toBeNull();
+        expect(deletedAuth).toBeNull();
+        expect(deletedAccount).toBeNull();
       });
     });
 
@@ -110,10 +102,10 @@ describe("v1.auth.route", () => {
         testResponse(res, 400, "required");
       });
       it("should only update allowed fields", async () => {
-        const { user, sessionId } = await insertUser();
+        const { user, sessionId, account } = await insertUser();
         const token = user.generateAuthToken(sessionId);
         const res = await exec(token, {
-          ...users[0],
+          ...testUser,
           name: "Updated Name",
           email: "update@update.com",
           role: "admin",
@@ -121,9 +113,9 @@ describe("v1.auth.route", () => {
         testResponse(res, 200);
 
         // name should update, email should not
-        const updatedUser = await User.findById(user._id);
-        expect(updatedUser.name).toBe("Updated Name");
-        expect(updatedUser.email).toBe(user.email);
+        const updatedUser = await User.findById(user._id).populate("accountId");
+        expect(updatedUser.accountId.name).toBe("Updated Name");
+        expect(updatedUser.accountId.email).toBe(account.email);
       });
     });
   });

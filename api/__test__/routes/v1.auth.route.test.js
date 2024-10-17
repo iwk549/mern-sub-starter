@@ -13,6 +13,7 @@ const {
 const {
   createUserSession,
   getUserSession,
+  deleteUserSession,
 } = require("../../utils/session.util");
 
 let server;
@@ -20,7 +21,6 @@ const endpoint = "/api/v1/auth";
 
 describe("v1.auth.route", () => {
   beforeAll(() => {
-    console.log(process.env.NODE_ENV);
     if (process.env.NODE_ENV === "test") server = require("../../index");
     else throw "Not in test environment";
   });
@@ -30,7 +30,7 @@ describe("v1.auth.route", () => {
 
   afterEach(async () => {
     await clearDb();
-    await clearRedis;
+    await clearRedis();
   });
 
   describe("Auth Route", () => {
@@ -48,31 +48,31 @@ describe("v1.auth.route", () => {
         testResponse(res, 400, "invalid login credentials");
       });
       it("should return 400 if password is empty", async () => {
-        const { user } = await insertUser();
-        const res = await exec({ email: user.email });
+        const { account } = await insertUser();
+        const res = await exec({ email: account.email });
         testResponse(res, 400, "invalid login credentials");
       });
       it("should return 400 if password does not match", async () => {
-        const { user } = await insertUser();
+        const { account } = await insertUser();
         const res = await exec({
-          email: user.email,
+          email: account.email,
           password: "not the right password",
         });
         testResponse(res, 400, "invalid login credentials");
       });
       it("should return 300 if user already has a session open", async () => {
-        const { user, plainTextPassword } = await insertUser();
-        await createUserSession(user);
+        const { account, plainTextPassword } = await insertUser(true);
         const res = await exec({
-          email: user.email,
+          email: account.email,
           password: plainTextPassword,
         });
         testResponse(res, 300, "session in progress");
       });
       it("should overwrite the existing session", async () => {
-        const { user, plainTextPassword, sessionId } = await insertUser();
+        const { user, account, plainTextPassword, sessionId } =
+          await insertUser();
         const res = await exec({
-          email: user.email,
+          email: account.email,
           password: plainTextPassword,
           overwriteSession: true,
         });
@@ -81,16 +81,16 @@ describe("v1.auth.route", () => {
         expect(updatedSessionId).not.toBe(sessionId);
       });
       it("should return an auth token in the headers if passwords match", async () => {
-        const { user, plainTextPassword } = await insertUser(false);
+        const { account, plainTextPassword } = await insertUser(false);
         const res = await exec({
-          email: user.email,
+          email: account.email,
           password: plainTextPassword,
         });
         testResponse(res, 200, "success");
         const decoded = decodeJwt(res.header[authHeader]);
         expect(decoded).toMatchObject({
-          name: user.name,
-          email: user.email,
+          name: account.name,
+          email: account.email,
           sessionId: expect.any(String),
         });
       });
@@ -107,10 +107,12 @@ describe("v1.auth.route", () => {
     it("should return 200 if the user session is not found", async () => {
       const { user } = await insertUser(false);
       const res = await exec(user.generateAuthToken(1234));
+      console.log(res.text);
       testResponse(res, 200, "session deleted");
     });
     it("should return 200 if the user session is deleted", async () => {
       const { user } = await insertUser(true);
+      deleteUserSession(user);
       const res = await exec(user.generateAuthToken(1234));
       testResponse(res, 200, "session deleted");
     });

@@ -42,10 +42,26 @@ input {
   padding-left: 10px;
   padding-right: 10px;
   background-color: var(--light);
-  color: var(--dark);
+  color: var(--darkest);
 }
 input::placeholder {
   color: var(--muted);
+  opacity: 1;
+}
+select {
+  min-width: 300px;
+  display: block;
+  margin: 10px;
+  border-radius: 3px;
+  padding: 5px;
+  padding-left: 10px;
+  padding-right: 10px;
+  background-color: var(--light);
+  color: var(--darkest);
+}
+.placeholder {
+  color: var(--muted);
+  background-color: pink;
   opacity: 1;
 }
 

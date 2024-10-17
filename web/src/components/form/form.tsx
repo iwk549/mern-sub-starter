@@ -1,6 +1,6 @@
-import { useForm, FieldErrors } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
-import Button from "./common/button";
+import Button from "../common/button";
 import { Input } from "@/types/form.types";
 import { yupResolver } from "@hookform/resolvers/yup";
 
@@ -39,24 +39,24 @@ class Form {
         {this._inputs.map((input, idx) => {
           const error = errors[input.name];
           if (input.type === "") return null;
-          else
-            return (
-              <div key={idx}>
-                <input
-                  type={input.type}
-                  placeholder={input.placeholder}
-                  {...register(input.name, input.validation || {})}
-                  {...input.other}
-                />
-                {error && (
-                  <span className="bg-lightest text-dark rounded p-1">
-                    {error.type === "required"
-                      ? `${input.label} is required`
-                      : String(error.message)}
-                  </span>
-                )}
-              </div>
-            );
+
+          return (
+            <div key={idx}>
+              <input
+                type={input.type}
+                placeholder={input.placeholder}
+                {...register(input.name, input.validation || {})}
+                {...input.other}
+              />
+              {error && (
+                <span className="bg-lightest text-dark rounded p-1">
+                  {error.type === "required"
+                    ? `${input.label} is required`
+                    : String(error.message)}
+                </span>
+              )}
+            </div>
+          );
         })}
         <Button>{this._submitButtonText}</Button>
       </form>

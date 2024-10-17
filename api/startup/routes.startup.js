@@ -6,6 +6,8 @@ const errorHandler = require("../middleware/errorHandler.mw");
 
 const v1_authRouter = require("../routes/v1/v1.auth.route");
 const v1_userRouter = require("../routes/v1/v1.user.routes");
+const v1_organizationRouter = require("../routes/v1/v1.organization.route");
+const { generalLimiter } = require("../middleware/rateLimiter.mw");
 
 const uploadLimit = "5mb";
 
@@ -20,6 +22,7 @@ router.use(
 );
 router.use(express.urlencoded({ extended: true, limit: uploadLimit }));
 router.use(express.static("public"));
+router.use(generalLimiter);
 
 router.use("/healthz", async (req, res) => {
   res.json("Healthy");
@@ -27,6 +30,7 @@ router.use("/healthz", async (req, res) => {
 
 router.use("/api/v1/auth", v1_authRouter);
 router.use("/api/v1/user", v1_userRouter);
+router.use("/api/v1/organization", v1_organizationRouter);
 
 router.use(errorHandler);
 

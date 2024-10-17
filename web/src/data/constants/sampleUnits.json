@@ -1,0 +1,10 @@
+[
+  {
+    "id": "metric",
+    "label": "Metric"
+  },
+  {
+    "id": "imperial",
+    "label": "Imperial"
+  }
+]

@@ -12,7 +12,10 @@ function auth(logout = false) {
       });
     try {
       const decoded = decodeJwt(token);
-      const user = await User.findById(decoded._id);
+      const user = await User.findById(decoded._id).populate({
+        path: "accountId",
+        populate: "authId",
+      });
       if (!user)
         return next({ status: 409, message: "Your account was not found" });
       const session = await getUserSession(user);
@@ -22,10 +25,10 @@ function auth(logout = false) {
           message: "Your session is no longer active. Please log in again.",
         });
       req.user = user;
-      next();
     } catch (ex) {
       return next({ status: 409, message: "Invalid token" });
     }
+    next();
   };
 }
 

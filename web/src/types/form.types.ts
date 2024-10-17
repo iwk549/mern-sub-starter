@@ -3,6 +3,8 @@ export type Input = {
   name: string;
   label: string;
   placeholder?: string;
+  min?: number;
+  max?: number;
   validation?: {
     [key: string]: string | boolean | RegExp;
   };

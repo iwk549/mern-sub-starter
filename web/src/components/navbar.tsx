@@ -38,6 +38,10 @@ export default function Navbar() {
         {user ? (
           <>
             {renderNavItem("/", "Home")}
+            {renderNavItem(
+              "/module?material=samples&module=sampleModule",
+              "Module Demo"
+            )}
             <Dropdown
               header={user.name}
               items={[
