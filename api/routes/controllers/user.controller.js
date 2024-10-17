@@ -1,58 +1,16 @@
-const mongoose = require("mongoose");
-const { User, validateUser } = require("../../models/user.model");
-const { saltAndHashPassword } = require("../../utils/encryption.util");
+const { User } = require("../../models/user.model");
 const { createAndSendJwt } = require("../../utils/jwt.util");
 const transactions = require("../../utils/transaction.util");
-const { createSafeUpdateObject } = require("../../utils/user.util");
-
-async function registerUser(req, res, next) {
-  const ex = validateUser(req.body, true);
-  if (ex.error)
-    return next({ status: 400, message: ex.error.details[0].message });
-
-  const existingUser = await User.findOne({ email: req.body.email });
-  if (existingUser)
-    return next({
-      status: 400,
-      message: "This email address is already registered",
-    });
-
-  const password = await saltAndHashPassword(req.body.password);
-  const authId = new mongoose.Types.ObjectId();
-
-  const queries = {
-    auth: {
-      collection: "auths",
-      query: "insertOne",
-      data: {
-        _id: authId,
-        password,
-        loginCode: null,
-      },
-    },
-    user: {
-      collection: "users",
-      query: "insertOne",
-      data: {
-        name: req.body.name,
-        email: req.body.email,
-        authId,
-      },
-    },
-  };
-
-  transactions.executeTransactionAndReturn(
-    queries,
-    "Account was not created.",
-    res,
-    next,
-    null,
-    (results) => createAndSendJwt(res, next, null, results.user.insertedId)
-  );
-}
+const { validateAccountUpdate } = require("../../utils/user.util");
+const { Account } = require("../../models/account.model");
 
 async function refreshUserInfo(req, res, next) {
-  createAndSendJwt(res, next, req.user);
+  createAndSendJwt(res, next, req.user, req.user._id);
+}
+
+async function getUserAccounts(req, res, next) {
+  const allUsers = await User.find({ accountId: req.user.accountId });
+  res.json(allUsers);
 }
 
 async function deleteUser(req, res, next) {
@@ -62,12 +20,24 @@ async function deleteUser(req, res, next) {
       query: "deleteOne",
       data: { _id: req.user._id },
     },
-    auth: {
+  };
+
+  const remainingAccounts = await User.find({
+    accountId: req.user.accountId._id,
+    _id: { $ne: req.user._id },
+  });
+  if (!remainingAccounts.length) {
+    queries.auth = {
       collection: "auths",
       query: "deleteOne",
-      data: { _id: req.user.authId },
-    },
-  };
+      data: { _id: req.user.accountId.authId._id },
+    };
+    queries.account = {
+      collection: "accounts",
+      query: "deleteOne",
+      data: { _id: req.user.accountId._id },
+    };
+  }
 
   transactions.executeTransactionAndReturn(
     queries,
@@ -78,20 +48,44 @@ async function deleteUser(req, res, next) {
 }
 
 async function updateUser(req, res, next) {
-  const ex = validateUser(req.body, false);
+  const ex = validateAccountUpdate(req.safeUpdateObject);
   if (ex.error)
     return next({ status: 400, message: ex.error.details[0].message });
 
-  const safeUpdateObject = createSafeUpdateObject(req.body);
+  // name is repeated across collections for ease of querying
+  // must update in both places
+  const queries = {
+    account: {
+      collection: "accounts",
+      query: "updateOne",
+      data: {
+        filter: { _id: req.user.accountId._id },
+        update: { $set: req.safeUpdateObject },
+      },
+    },
+    user: {
+      collection: "users",
+      query: "updateMany",
+      data: {
+        filter: { _id: req.user._id },
+        update: { $set: { name: req.safeUpdateObject.name } },
+      },
+    },
+  };
 
-  await User.updateOne({ _id: req.user._id }, { $set: safeUpdateObject });
-
-  createAndSendJwt(res, next, null, req.user._id);
+  transactions.executeTransactionAndReturn(
+    queries,
+    "Account was not deleted.",
+    res,
+    next,
+    null,
+    () => createAndSendJwt(res, next, null, req.user._id)
+  );
 }
 
 module.exports = {
-  registerUser,
   refreshUserInfo,
+  getUserAccounts,
   deleteUser,
   updateUser,
 };

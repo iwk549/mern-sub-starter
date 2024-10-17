@@ -3,13 +3,13 @@
 import { useState, useContext } from "react";
 import * as yup from "yup";
 
-import Form from "@/components/form";
 import toast from "../../utils/toast.util";
-import { Login } from "@/types/user.types";
+import { Login } from "@/types/data.types";
 import { login } from "@/services/auth.service";
 import Confirm from "@/components/common/confirm";
 import UserContext from "@/context/userContext/userContext";
 import AppContext from "@/context/appContext/appContext";
+import Form from "@/components/form/form";
 
 const schema = yup.object({
   email: yup.string().email().required(),
@@ -48,32 +48,37 @@ export default function LoginForm() {
     doLogin(data, false);
   }
 
-  const form = new Form(handleLogin, "Login", schema, [
-    {
-      type: "text",
-      name: "email",
-      label: "Email",
-      placeholder: "email",
-      other: {
-        autoComplete: "username",
-        defaultValue: "iwk549@gmail.com",
-      },
-    },
-    {
-      type: "password",
-      name: "password",
-      label: "Password",
-      placeholder: "password",
-      other: {
-        autoComplete: "current-password",
-        defaultValue: "Password1",
-      },
-    },
-  ]);
-
   return (
     <div className="flex h-screen">
-      <div className="m-auto">{form.render()}</div>
+      <div className="m-auto">
+        <Form
+          raiseSubmit={handleLogin}
+          submitButtonText="Login"
+          schema={schema}
+          inputs={[
+            {
+              type: "text",
+              name: "email",
+              label: "Email",
+              placeholder: "email",
+              other: {
+                autoComplete: "username",
+                defaultValue: "test1@structuremate.com",
+              },
+            },
+            {
+              type: "password",
+              name: "password",
+              label: "Password",
+              placeholder: "password",
+              other: {
+                autoComplete: "current-password",
+                defaultValue: "Password1!",
+              },
+            },
+          ]}
+        />
+      </div>
       <Confirm
         isOpen={overrideOpen}
         onClose={() => setOverrideOpen(false)}

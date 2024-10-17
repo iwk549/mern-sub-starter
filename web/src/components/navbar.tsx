@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext } from "react";
 import UserContext from "@/context/userContext/userContext";
 import Confirm from "./common/confirm";
 import { logout } from "@/services/auth.service";
@@ -38,6 +38,10 @@ export default function Navbar() {
         {user ? (
           <>
             {renderNavItem("/", "Home")}
+            {renderNavItem(
+              "/module?material=samples&module=sampleModule",
+              "Module Demo"
+            )}
             <Dropdown
               header={user.name}
               items={[
@@ -45,6 +49,11 @@ export default function Navbar() {
                   text: "Profile",
                   iconName: "user",
                   onClick: () => navigate("/profile"),
+                },
+                {
+                  text: "Projects",
+                  iconName: "project",
+                  onClick: () => navigate("/project"),
                 },
                 {
                   text: "Logout",

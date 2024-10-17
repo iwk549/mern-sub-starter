@@ -1,0 +1,160 @@
+{
+  "material": "Samples",
+  "module": "Sample Module",
+  "calculations": [
+    {
+      "label": "Images",
+      "content": [
+        {
+          "id": "sniffles_left1.jpg",
+          "label": "Sniffles and Penny",
+          "type": "image",
+          "path": "samples",
+          "properties": {
+            "width": "50%",
+            "height": "auto"
+          }
+        }
+      ]
+    },
+    {
+      "label": "Charts",
+      "content": []
+    }
+  ],
+  "inputs": [
+    {
+      "label": "General",
+      "content": [
+        {
+          "id": "description",
+          "label": "Description (min 3 max 99)",
+          "type": "text",
+          "validation": {
+            "label": "Description",
+            "required": true,
+            "min": 3,
+            "max": 99
+          }
+        },
+        {
+          "id": "units",
+          "label": "Units",
+          "type": "select",
+          "options": "sampleUnits.json"
+        },
+        {
+          "label": "Text Line Left aligned with spacing above and below",
+          "type": "textBreak",
+          "class": "my-10"
+        },
+        {
+          "label": "text center aligned, large bold font",
+          "type": "textBreak",
+          "class": "text-center font-bold text-2xl mb-2"
+        },
+        [
+          {
+            "id": "sbs1",
+            "label": "Side by Side Input",
+            "type": "text",
+            "validation": {
+              "label": "Module Name",
+              "required": true,
+              "min": 3,
+              "max": 25
+            }
+          },
+          [
+            {
+              "id": "sbs2",
+              "label": "Side by Side Stacked Input",
+              "type": "text"
+            },
+            {
+              "id": "sbs3",
+              "label": "Side by Side Stacked Input",
+              "type": "text"
+            }
+          ]
+        ],
+        {
+          "id": "a1",
+          "label": "Text Input (ft)",
+          "type": "text",
+          "placeholder": "placeholder text"
+        },
+        {
+          "id": "oni",
+          "label": "Optional Number Input",
+          "type": "number",
+          "step": 0.1,
+          "validation": {
+            "required": false,
+            "min": 3,
+            "max": 99
+          }
+        },
+        {
+          "id": "i1",
+          "label": "Required Number Input",
+          "type": "number",
+          "step": 0.01,
+          "validation": {
+            "required": true
+          }
+        },
+        {
+          "id": "select1",
+          "label": "Select with Local Options",
+          "type": "select",
+          "options": [
+            { "id": "a", "label": "A" },
+            { "id": "b", "label": "B" }
+          ],
+          "validation": {
+            "label": "random label",
+            "required": false,
+            "min": 3,
+            "max": 99
+          }
+        },
+        {
+          "id": "select2",
+          "label": "Select with Remote Options",
+          "type": "select",
+          "placeholder": "make a selection",
+          "options": "sampleRemoteOptions.json"
+        },
+        {
+          "type": "function",
+          "label": "Calling a function, takes in all values as object",
+          "path": "samples/sampleFunctions",
+          "id": "sampleCalculation"
+        },
+        {
+          "type": "function",
+          "label": "Calling a function, takes in all values as object",
+          "path": "samples/sampleFunctions",
+          "id": "sampleCalculation2"
+        }
+      ]
+    },
+    {
+      "label": "Another Tab",
+      "content": [
+        {
+          "label": "Have as many tabs as you need, with as many text lines, inputs, or whatever else you need to put down",
+          "type": "textBreak"
+        },
+        { "label": "Let's do some calculations", "type": "textBreak" },
+        {
+          "type": "function",
+          "label": "Calling a function, takes in all values as object",
+          "path": "samples/sampleFunctions",
+          "id": "sampleCalculation"
+        }
+      ]
+    }
+  ]
+}

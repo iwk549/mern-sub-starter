@@ -1,5 +1,14 @@
+import { GenObj } from "@/types/generic.types";
 import { IconContext, IconType } from "react-icons";
-import { FaArrowDown, FaArrowUp, FaRegUser } from "react-icons/fa";
+import {
+  FaArrowDown,
+  FaArrowUp,
+  FaRegUser,
+  FaProjectDiagram,
+  FaEdit,
+  FaFolderOpen,
+} from "react-icons/fa";
+import { MdAutoDelete } from "react-icons/md";
 import { RiLogoutBoxLine } from "react-icons/ri";
 
 type IconProps = {
@@ -7,11 +16,13 @@ type IconProps = {
   overrideClass?: string;
 };
 
-const iconMap: {
-  [key: string]: IconType;
-} = {
+const iconMap: GenObj<IconType> = {
+  delete: MdAutoDelete,
   downArrow: FaArrowDown,
+  edit: FaEdit,
   logout: RiLogoutBoxLine,
+  open: FaFolderOpen,
+  project: FaProjectDiagram,
   upArrow: FaArrowUp,
   user: FaRegUser,
 };

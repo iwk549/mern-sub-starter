@@ -22,12 +22,20 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <UserContextWrapper>
-          <AppContextWrapper>
+        <AppContextWrapper>
+          <UserContextWrapper>
             <Navbar />
             {children}
-          </AppContextWrapper>
-        </UserContextWrapper>
+            <footer className="py-4">
+              <div className="container mx-auto text-center">
+                <p className="text-sm">
+                  &copy; {new Date().getFullYear()} StructureMate. All rights
+                  reserved.
+                </p>
+              </div>
+            </footer>
+          </UserContextWrapper>
+        </AppContextWrapper>
         <ToastContainer limit={1} />
       </body>
     </html>

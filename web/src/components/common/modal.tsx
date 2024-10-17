@@ -1,12 +1,11 @@
+import { GenObj } from "@/types/generic.types";
 import Modal from "react-modal";
 
 type BasicModalProps = {
   isOpen: boolean;
   onClose?: () => void;
   children: React.ReactNode;
-  contentStyle?: {
-    [key: string]: string | number | boolean;
-  };
+  contentStyle?: GenObj<string | number | boolean>;
 };
 
 export default function BasicModal({

@@ -27,7 +27,7 @@ export default function Dropdown({ header, items }: DropdownProps) {
         <Icon name={(isOpen ? "up" : "down") + "Arrow"} />
       </div>
       {isOpen ? (
-        <div className="absolute right-2 top-8 bg-muted text-light m-2 p-2 rounded border-2 border-dark shadow-lg">
+        <div className="z-10 absolute right-2 top-8 bg-muted text-light m-2 p-2 rounded border-2 border-dark shadow-lg">
           {items.map((item, idx) => (
             <div
               key={idx}

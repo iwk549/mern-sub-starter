@@ -2,12 +2,16 @@ import { createContext } from "react";
 
 type UserContextType = {
   user: any;
-  refreshUser: any;
+  refreshUser: () => void;
+  org: any;
+  refreshOrg: () => void;
 };
 
 const UserContext = createContext<UserContextType>({
   user: null,
-  refreshUser: null,
+  refreshUser: () => {},
+  org: null,
+  refreshOrg: () => {},
 });
 
 export default UserContext;

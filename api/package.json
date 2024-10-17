@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "NODE_ENV=dev nodemon index.js",
     "test": "NODE_ENV=test && jest --verbose --runInBand --watch",
-    "test:coverage": "jest --runInBand --coverage"
+    "test:coverage": "NODE_ENV=test && jest --runInBand --coverage"
   },
   "author": "",
   "license": "MIT",

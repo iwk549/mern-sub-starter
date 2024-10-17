@@ -3,15 +3,24 @@
  * @param {*} mustExist is the email required to exist on the request body
  * @returns error or passes to next middleware
  */
-module.exports = function (mustExist) {
+module.exports = function (mustExist, containedInObject, containedInParam) {
   return (req, res, next) => {
-    if (!req.body.email) {
+    let email = containedInParam
+      ? req.params[containedInParam]
+      : containedInObject
+      ? req.body[containedInObject]
+        ? req.body[containedInObject]?.email
+        : null
+      : req.body.email;
+
+    if (!email) {
       if (mustExist) return next({ status: 400, message: "Email is required" });
       else next();
     } else {
-      let email = req.body.email;
       email = email.toLowerCase().trim();
-      req.body.email = email;
+      if (containedInParam) req.params[containedInParam] = email;
+      else if (containedInObject) req.body[containedInObject].email = email;
+      else req.body.email = email;
       next();
     }
   };

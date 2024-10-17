@@ -9,7 +9,7 @@ function decodeJwt(token) {
 
 async function createAndSendJwt(res, next, user, userId) {
   let thisUser = user;
-  if (userId) thisUser = await User.findById(userId);
+  if (userId) thisUser = await User.findById(userId).populate("accountId");
 
   try {
     const sessionId = await createUserSession(thisUser);

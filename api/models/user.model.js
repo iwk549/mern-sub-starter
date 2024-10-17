@@ -1,17 +1,34 @@
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const Joi = require("joi");
+const { deletedSchema, nameSchema } = require("../utils/schema.util");
 Joi.objectID = require("joi-objectid")(Joi);
 
-const { passwordSchema } = require("./auth.model");
+const roleHierarchy = [
+  { name: "owner", level: 1 },
+  { name: "admin", level: 2 },
+  { name: "standard", level: 3 },
+  { name: "readonly", level: 4 },
+];
 
-const roles = ["admin", "user"];
+const roles = roleHierarchy.map((role) => role.name);
 
 const userMongooseSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
+  accountId: {
+    type: mongoose.Types.ObjectId,
+    required: true,
+    ref: "Account",
+  },
+  organizationId: {
+    type: mongoose.Types.ObjectId,
+    required: true,
+    ref: "Organization",
+  },
+  // email and name is required on both user and account to simplify queries
+  name: nameSchema.mongo,
+  email: { type: String, required: true, unique: false },
   role: { type: String, required: false, enum: roles },
-  authId: { type: mongoose.Types.ObjectId, required: true, ref: "Auth" },
+  deleted: deletedSchema.mongo,
 });
 
 userMongooseSchema.methods.generateAuthToken = function (sessionId) {
@@ -19,9 +36,11 @@ userMongooseSchema.methods.generateAuthToken = function (sessionId) {
   const token = jwt.sign(
     {
       _id: this._id,
-      name: this.name,
-      email: this.email,
+      accountId: this.accountId._id,
+      name: this.accountId.name,
+      email: this.accountId.email,
       role: this.role,
+      organizationId: this.organizationId,
       sessionId: String(sessionId),
     },
     process.env.JWT_KEY
@@ -32,18 +51,17 @@ userMongooseSchema.methods.generateAuthToken = function (sessionId) {
 const User = mongoose.model("User", userMongooseSchema);
 
 const userSchema = {
-  name: Joi.string().required().min(3).max(20),
+  accountId: Joi.objectID().required(),
+  organizationId: Joi.objectID().required(),
+  name: nameSchema.joi,
   email: Joi.string().email().required(),
   role: Joi.string()
     .optional()
     .allow(...roles),
+  deleted: deletedSchema.joi,
 };
 
-function validateUser(user, isNew) {
-  const schema = { ...userSchema };
-  if (isNew) schema.password = passwordSchema;
-  return Joi.object(schema).validate(user);
-}
-
-exports.validateUser = validateUser;
+exports.userSchema = userSchema;
+exports.roleHierarchy = roleHierarchy;
+exports.roles = roles;
 exports.User = User;

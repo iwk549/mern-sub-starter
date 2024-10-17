@@ -36,7 +36,12 @@ export async function makeRequest(
   };
   if (body) options.body = JSON.stringify(body);
 
-  const res = await fetch(baseUrl + extension, options);
+  let res;
+  try {
+    res = await fetch(baseUrl + extension, options);
+  } catch (error) {
+    return { ok: false, status: 500, body: "Server Error Occurred" };
+  }
 
   let token;
   if (updateToken) {

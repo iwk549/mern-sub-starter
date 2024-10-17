@@ -19,7 +19,6 @@ export default function AppContextWrapper({
 
   async function initApp() {
     // all code for initializing app settings goes here
-    setLoading(false);
   }
 
   useEffect(() => {

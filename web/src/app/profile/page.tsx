@@ -4,7 +4,6 @@ import { useState, useContext, useEffect } from "react";
 import * as yup from "yup";
 
 import toast from "../../utils/toast.util";
-import Form from "@/components/form";
 import Button from "@/components/common/button";
 import Confirm from "@/components/common/confirm";
 import {
@@ -14,22 +13,26 @@ import {
 } from "@/services/user.service";
 import AppContext from "@/context/appContext/appContext";
 import UserContext from "@/context/userContext/userContext";
-import { UserUpdate } from "@/types/user.types";
+import { UserUpdate } from "@/types/data.types";
 import AuthedPage from "@/components/common/authedPage";
+import { translateRole } from "@/utils/user.util";
+import Form from "@/components/form/form";
 
 const schema = yup.object({
   name: yup.string().required().min(3).max(20),
 });
 
 export default function Profile() {
-  const { user, refreshUser } = useContext(UserContext);
+  const { user, refreshUser, org, refreshOrg } = useContext(UserContext);
   const { navigate, setLoading } = useContext(AppContext);
   const [editMode, setEditMode] = useState(false);
   const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
 
   async function handleRefreshToken() {
     await refreshUserToken();
+    await refreshOrg();
     refreshUser();
+    setLoading(false);
   }
   useEffect(() => {
     handleRefreshToken();
@@ -58,22 +61,6 @@ export default function Profile() {
     setLoading(false);
   }
 
-  const form = new Form(
-    handleUpdateAccount,
-    "Update",
-    schema,
-    [
-      {
-        type: "text",
-        name: "name",
-        label: "Name",
-        placeholder: "name",
-        other: { defaultValue: user?.name },
-      },
-    ],
-    editMode
-  );
-
   return (
     <AuthedPage>
       <div className="app-wrap">
@@ -85,10 +72,32 @@ export default function Profile() {
           {editMode ? "Cancel" : ""} Edit Profile
         </Button>
         <div className="flex flex-col items-center">
-          {!editMode ? <div>{user?.name}</div> : null}
-          {form.render()}
+          {!editMode ? (
+            <div className="text-center">
+              {user?.name}
+              <br />
+              {org?.name}
+              <br />
+              {translateRole(user?.role)}
+            </div>
+          ) : null}
+          <Form
+            raiseSubmit={handleUpdateAccount}
+            submitButtonText="Update"
+            schema={schema}
+            inputs={[
+              {
+                type: "text",
+                name: "name",
+                label: "Name",
+                placeholder: "name",
+                other: { defaultValue: user?.name },
+              },
+            ]}
+            show={editMode}
+          />
         </div>
-        <div className="float-right">
+        <div className="flex justify-end">
           <Button
             size="small"
             type="dark"

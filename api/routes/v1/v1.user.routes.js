@@ -1,19 +1,18 @@
 const router = require("express").Router();
 
-const { loginLimiter } = require("../../middleware/rateLimiter.mw");
-const emailValidator = require("../../middleware/emailValidator.mw");
-const auth = require("../../middleware/auth.mw");
+const { auth } = require("../../middleware/auth.mw");
+const { createSafeUpdateObject } = require("../../middleware/update.mw");
 
 const {
-  registerUser,
   refreshUserInfo,
   deleteUser,
   updateUser,
+  getUserAccounts,
 } = require("../controllers/user.controller");
 
-router.post("/", [loginLimiter, emailValidator(true)], registerUser);
 router.get("/", [auth()], refreshUserInfo);
+router.get("/accounts", [auth()], getUserAccounts);
 router.delete("/", [auth()], deleteUser);
-router.put("/", [auth()], updateUser);
+router.put("/", [auth(), createSafeUpdateObject("account")], updateUser);
 
 module.exports = router;

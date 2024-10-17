@@ -17,6 +17,20 @@ const loginLimiter = rateLimit({
   },
 });
 
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max:
+    process.env.NODE_ENV === "cypress" || process.env.NODE_ENV === "test"
+      ? maxForCypressRequests
+      : 500, // number of requests allowed in timeframe
+  statusCode: 429,
+  message: tooManyAttemptsMessage,
+  handler: function (req, res) {
+    res.status(429).json(tooManyAttemptsMessage);
+  },
+});
+
 module.exports = {
   loginLimiter,
+  generalLimiter,
 };
