@@ -1,3 +1,4 @@
+import { GenObj } from "@/types/generic.types";
 import { IconContext, IconType } from "react-icons";
 import { FaArrowDown, FaArrowUp, FaRegUser } from "react-icons/fa";
 import { RiLogoutBoxLine } from "react-icons/ri";
@@ -7,9 +8,7 @@ type IconProps = {
   overrideClass?: string;
 };
 
-const iconMap: {
-  [key: string]: IconType;
-} = {
+const iconMap: GenObj<IconType> = {
   downArrow: FaArrowDown,
   logout: RiLogoutBoxLine,
   upArrow: FaArrowUp,

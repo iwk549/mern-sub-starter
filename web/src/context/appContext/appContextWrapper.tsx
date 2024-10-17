@@ -15,11 +15,10 @@ export default function AppContextWrapper({
   const router = useRouter();
   const pathname = usePathname();
   const [pageHeader, setPageHeader] = useState<string>("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   async function initApp() {
     // all code for initializing app settings goes here
-    setLoading(false);
   }
 
   useEffect(() => {

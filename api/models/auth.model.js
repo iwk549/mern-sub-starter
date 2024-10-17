@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Joi = require("joi");
 const passwordComplexity = require("joi-password-complexity");
+const { deletedSchema } = require("../utils/schema.util");
 
 const passwordComplexityOptions = {
   min: 8,
@@ -22,6 +23,7 @@ const authMongooseSchema = new mongoose.Schema({
       validThru: { type: Date, required: true },
     },
   },
+  deleted: deletedSchema.mongo,
 });
 
 const Auth = mongoose.model("Auth", authMongooseSchema);
@@ -37,6 +39,7 @@ const authSchema = {
       validThru: Joi.date().required(),
     })
     .allow(null),
+  deleted: deletedSchema.joi,
 };
 
 function validateAuth(auth) {

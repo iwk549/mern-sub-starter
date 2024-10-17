@@ -1,3 +1,5 @@
+import { GenObj } from "@/types/generic.types";
+
 type ButtonProps = {
   clickHandler?: (event: React.MouseEvent<HTMLButtonElement>) => void;
   type?: string;
@@ -5,7 +7,7 @@ type ButtonProps = {
   children: React.ReactNode;
 };
 
-const typeClassMap: { [key: string]: string } = {
+const typeClassMap: GenObj = {
   primary:
     "bg-light border-light text-dark hover:bg-muted hover:text-lightest hover:border-lightest",
   secondary:
@@ -13,7 +15,7 @@ const typeClassMap: { [key: string]: string } = {
   dark: "bg-darkest border-darkest text-light hover:bg-dark hover:text-light hover:border-light",
 };
 
-const sizeMap: { [key: string]: string } = {
+const sizeMap: GenObj = {
   small: "text-sm mx-2 my-2 py-1 px-2",
   medium: "text-base mx-4 my-4 py-2 px-4",
 };

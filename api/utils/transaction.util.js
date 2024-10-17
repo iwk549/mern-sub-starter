@@ -43,10 +43,7 @@ transactions.executeTransactionAndReturn = async (
   session.startTransaction();
 
   try {
-    const options =
-      process.env.NODE_ENV === "production"
-        ? { session, returnOriginal: false }
-        : {};
+    const options = { session, returnOriginal: false };
     let results = {};
 
     for (let property in queries) {
